@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多跳问答检索与可视化</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <style>
+        /* 1. 实体节点检索模块 - 浅蓝 */
+        .entity-search-card {
+            background-color: #e3f2fd !important;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* 2. 多跳问答检索模块 - 浅绿 */
+        .qa-search-card {
+            background-color: #e8f5e9 !important;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* 3. 实体关联子图聚类模块 - 浅橙 */
+        .cluster-card {
+            background-color: #fff3e0 !important;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* 4. 图表、知识图谱卡片 - 浅灰 */
+        .chart-card, .graph-card {
+            background-color: #f5f5f5 !important;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* 实体检索结果区域样式 */
+        #entitySearchResult {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* 页面整体底色 */
+        body {
+            background-color: #f0f2f5;
+        }
+    </style>
+</head>
+<body>     
+    <div class="container">
+        <div class="header">
+            <h1>多跳问答检索与可视化</h1>
+            <p>聚类统计 + 弹窗式多跳推理过程可视化</p>
+        </div>
+
+        <!-- 1. 实体节点检索模块（加专属类名） -->
+        <div class="search-box entity-search-card">
+            <h3>实体节点检索</h3>
+            <div class="search-input">
+                <input type="text" id="entitySearchKeyword" placeholder="输入关键词，如 film">
+                <button class="search-btn" onclick="searchEntity()">搜索实体</button>
+            </div>
+            <!-- 结果独立展示 -->
+            <div id="entitySearchResult" class="result-list"></div>
+        </div>
+
+        <!-- 2. 多跳问答检索模块（加专属类名） -->
+        <div class="search-box qa-search-card">
+            <h3>多跳问答检索</h3>
+            <input type="text" id="keyword" placeholder="输入问题关键词，如 film、director">
+            <button class="search-btn" onclick="searchQA()">开始检索问答</button>
+        </div>
+
+        <!-- 问答检索结果列表 -->
+        <div class="result-list" id="results"></div>
+
+        <!-- 实体关联子图聚类（加专属类名） -->
+        <div class="cluster-box cluster-card">
+            <h3>实体关联子图聚类（多跳查询）</h3>
+            <div class="cluster-input">
+                <input type="text" id="clusterEntity" placeholder="输入实体名称，如 Move (1970 film)">
+                <select id="clusterDepth">
+                    <option value="1">1跳关联</option>
+                    <option value="2">2跳关联</option>
+                </select>
+                <select id="clusterLimit">
+                    <option value="20">显示20条</option>
+                    <option value="50" selected>显示50条</option>
+                </select>
+                <button class="search-btn" onclick="showEntityCluster()">查看关联子图</button>
+            </div>
+            <div id="clusterGraph" class="chart-card"></div>
+        </div>
+
+        <!-- 全局聚类图表 -->
+        <div class="chart-row">
+            <div class="chart-card" id="typeChart"></div>
+            <div class="chart-card" id="stepChart"></div>
+        </div>
+
+        <!-- 全局知识图谱 -->
+        <div class="graph-card" id="graph"></div>
+    </div>
+
+    <!-- 多跳推理 弹窗容器 -->
+    <div id="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">关闭</button>
+            <div id="modalGraph"></div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+
+    <!-- 实体检索逻辑 -->
+    <script>
+        const API_BASE = "/api";
+        async function searchEntity() {
+            const keyword = document.getElementById("entitySearchKeyword").value.trim();
+            const resDom = document.getElementById("entitySearchResult");
+            if (!keyword) {
+                resDom.innerHTML = "<p style='color:#999; margin:0;'>请输入检索关键词</p>";
+                return;
+            }
+            resDom.innerHTML = "<p style='color:#999; margin:0;'>正在检索实体...</p>";
+            try {
+                const resp = await fetch(`${API_BASE}/entity/search?keyword=${encodeURIComponent(keyword)}&limit=50`);
+                const data = await resp.json();
+                if (data.data.length === 0) {
+                    resDom.innerHTML = `<p style='color:#999; margin:0;'>未找到名称包含「${keyword}」的实体</p>`;
+                    return;
+                }
+                let html = `<p style='margin:0 0 8px 0;'>共找到 ${data.count} 个实体：</p><ul style='margin:0; padding-left:20px;'>`;
+                data.data.forEach(item => {
+                    html += `<li style='margin:4px 0;'>${item.name}</li>`;
+                });
+                html += "</ul>";
+                resDom.innerHTML = html;
+            } catch (err) {
+                resDom.innerHTML = `<p style='color:red; margin:0;'>检索失败：${err.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
