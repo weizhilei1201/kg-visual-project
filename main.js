@@ -23,7 +23,9 @@ async function searchQA() {
     }
 
     try {
-        const res = await fetch(`${API_BASE}/search?keyword=${encodeURIComponent(keyword)}`);
+        const res = await fetch(`${API_BASE}/search?keyword=${encodeURIComponent(keyword)}`, {
+  headers: { "ngrok-skip-browser-warning": "true" }
+});
         const json = await res.json();
         let html = "";
 
@@ -66,7 +68,9 @@ async function loadReasonChain(docId) {
 
     try {
         const url = `${API_BASE}/chain/detail?id=${encodeURIComponent(docId)}`;
-        const res = await fetch(url);
+        const res = await fetch(url, {
+  headers: { "ngrok-skip-browser-warning": "true" }
+});
         const json = await res.json();
 
         if (!json || !json.data || json.data.length === 0) {
@@ -140,7 +144,9 @@ async function loadReasonChain(docId) {
 
 async function initTypeClusterChart() {
     try {
-        const res = await fetch(`${API_BASE}/cluster/type`);
+        const res = await fetch(`${API_BASE}/cluster/type`, {
+  headers: { "ngrok-skip-browser-warning": "true" }
+});
         const json = await res.json();
         const chart = echarts.init(document.getElementById("typeChart"));
         chart.setOption({
@@ -161,7 +167,9 @@ async function initTypeClusterChart() {
 
 async function initStepClusterChart() {
     try {
-        const res = await fetch(`${API_BASE}/cluster/steps`);
+        const res = await fetch(`${API_BASE}/cluster/steps`, {
+  headers: { "ngrok-skip-browser-warning": "true" }
+});
         const json = await res.json();
         const chart = echarts.init(document.getElementById("stepChart"));
         chart.setOption({
@@ -187,7 +195,9 @@ async function initStepClusterChart() {
 
 async function initGlobalGraph() {
     try {
-        const res = await fetch(`${API_BASE}/graph/sample?limit=20`);
+        const res = await fetch(`${API_BASE}/graph/sample?limit=20`, {
+  headers: { "ngrok-skip-browser-warning": "true" }
+});
         const json = await res.json();
         const nodes = new Map();
         const links = [];
@@ -258,7 +268,9 @@ async function showEntityCluster() {
     try {
         // 5. 发起请求（和你浏览器里能访问的地址完全一致）
         const url = `${API_BASE}/cluster/entity?entity=${encodeURIComponent(entity)}&depth=${depth}&limit=${limit}`;
-        const res = await fetch(url);
+        const res = await fetch(url, {
+  headers: { "ngrok-skip-browser-warning": "true" }
+});
         const json = await res.json();
 
         // 6. 处理空数据
@@ -335,7 +347,9 @@ async function searchEntity() {
 
     try {
         const url = `${API_BASE}/entity/search?keyword=${encodeURIComponent(keyword)}&limit=50`;
-        const res = await fetch(url);
+        const res = await fetch(url, {
+  headers: { "ngrok-skip-browser-warning": "true" }
+});
         const json = await res.json();
 
         if (json.data.length === 0) {
