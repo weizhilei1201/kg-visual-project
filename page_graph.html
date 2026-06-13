@@ -32,61 +32,123 @@
         <div class="graph-card" id="graphChart"></div>
     </div>
 
-    <script src="main.js"></script>
     <script>
         window.addEventListener('load', async function() {
             const chartDom = document.getElementById('graphChart');
+            if (!chartDom) {
+                console.error('找不到 graphChart 容器');
+                return;
+            }
+
             const myChart = echarts.init(chartDom);
-
-            const res = await fetch(`${API_BASE}/graph/sample?limit=100`);
-            const json = await res.json();
-            const data = json.data || [];
-
-            const nodes = [];
-            const links = [];
-            const nodeSet = new Set();
-
-            data.forEach(item => {
-                const s = item.subject;
-                const o = item.object;
-                const p = item.predicate;
-
-                if (!nodeSet.has(s)) {
-                    nodeSet.add(s);
-                    nodes.push({ name: s });
-                }
-                if (!nodeSet.has(o)) {
-                    nodeSet.add(o);
-                    nodes.push({ name: o });
-                }
-
-                links.push({
-                    source: s,
-                    target: o,
-                    name: p
-                });
-            });
-
-            const option = {
-                tooltip: {},
-                series: [{
-                    type: 'graph',
-                    layout: 'force',
-                    data: nodes,
-                    links: links,
-                    roam: true,
-                    label: {
-                        show: true,
-                        position: 'right'
-                    },
-                    force: {
-                        repulsion: 200,
-                        edgeLength: 100
+            
+            // 显示加载提示
+            chartDom.innerHTML = '<div style="text-align:center; padding-top:300px;">正在加载数据...</div>';
+            
+            try {
+                // 直接读取本地的 data.json
+                const res = await fetch('data.json');
+                const allData = await res.json();
+                
+                console.log('数据加载完成，共 ' + allData.length + ' 条');
+                
+                const nodes = new Map();
+                const links = [];
+                let tripleCount = 0;
+                const MAX_TRIPLES = 150;  // 限制最多150条边，避免渲染过慢
+                
+                // 从数据中提取三元组
+                for (let i = 0; i < allData.length && tripleCount < MAX_TRIPLES; i++) {
+                    const steps = allData[i].evidences || [];
+                    for (let j = 0; j < steps.length && tripleCount < MAX_TRIPLES; j++) {
+                        const step = steps[j];
+                        if (Array.isArray(step) && step.length >= 3) {
+                            const sub = step[0];
+                            const pred = step[1];
+                            const obj = step[2];
+                            
+                            if (sub && obj) {
+                                if (!nodes.has(sub)) nodes.set(sub, { name: sub });
+                                if (!nodes.has(obj)) nodes.set(obj, { name: obj });
+                                links.push({
+                                    source: sub,
+                                    target: obj,
+                                    name: pred
+                                });
+                                tripleCount++;
+                            }
+                        }
                     }
-                }]
-            };
-
-            myChart.setOption(option);
+                }
+                
+                console.log('渲染图谱：' + nodes.size + ' 个节点，' + links.length + ' 条边');
+                
+                // 如果没有任何数据，显示提示
+                if (nodes.size === 0) {
+                    chartDom.innerHTML = '<div style="text-align:center; padding-top:300px;">暂无图谱数据</div>';
+                    return;
+                }
+                
+                const option = {
+                    title: {
+                        text: '全局知识图谱样本 (显示前 ' + tripleCount + ' 条关系)',
+                        left: 'center',
+                        textStyle: { fontSize: 14 }
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function(params) {
+                            if (params.dataType === 'edge') {
+                                return params.data.name;
+                            }
+                            return params.name;
+                        }
+                    },
+                    series: [{
+                        type: 'graph',
+                        layout: 'force',
+                        data: Array.from(nodes.values()),
+                        links: links,
+                        roam: true,
+                        draggable: true,
+                        label: {
+                            show: true,
+                            position: 'right',
+                            fontSize: 12
+                        },
+                        edgeLabel: {
+                            show: true,
+                            fontSize: 10,
+                            formatter: function(params) {
+                                return params.data.name;
+                            },
+                            position: 'middle'
+                        },
+                        edgeSymbol: ['none', 'arrow'],
+                        edgeSymbolSize: [0, 8],
+                        force: {
+                            repulsion: 300,
+                            edgeLength: 120,
+                            gravity: 0.1
+                        },
+                        lineStyle: {
+                            curveness: 0.2,
+                            width: 1.5
+                        }
+                    }]
+                };
+                
+                myChart.setOption(option);
+                
+                // 窗口大小变化时重新调整
+                window.addEventListener('resize', function() {
+                    myChart.resize();
+                });
+                
+            } catch (err) {
+                console.error('加载失败:', err);
+                chartDom.innerHTML = '<div style="text-align:center; padding-top:300px; color:red;">加载失败：' + err.message + '</div>';
+            }
         });
     </script>
 </body>
