@@ -460,9 +460,6 @@ async function loadStatistics() {
         totalCountElem.innerText = "数据集总条数：" + data.length;
     }
     
-    // 问题类型分布（已经在 initTypeClusterChart 中处理）
-    // 推理步数分布（已经在 initStepClusterChart 中处理）
-    
     // 问题单词数分布
     var wordCountDist = new Map();
     for (var i = 0; i < data.length; i++) {
