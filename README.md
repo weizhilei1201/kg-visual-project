@@ -29,7 +29,7 @@ web/
 └── page_cluster.html # 聚类统计页面
 
 ## 数据格式说明
-data.json 中的每条数据格式如下：
+-data.json 中的每条数据格式如下：
 
 json
 {
