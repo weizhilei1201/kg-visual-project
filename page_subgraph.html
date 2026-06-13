@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
-        /* 全局样式调整，不影响原有逻辑 */
         .cluster-input select {
             padding: 8px 12px;
             font-size: 14px;
@@ -22,7 +21,6 @@
             opacity: 0.9;
             transform: translateY(-1px);
         }
-        /* 新增：实体检索部分的样式 */
         .entity-search-section .cluster-input {
             display: flex;
             gap: 10px;
@@ -94,7 +92,6 @@
             <div id="clusterGraph"></div>
         </div>
 
-        <!-- 实体名称检索（已修改样式+热门实体） -->
         <div class="cluster-box entity-search-section">
             <h3>实体名称检索</h3>
             <div class="cluster-input">
@@ -102,7 +99,6 @@
                 <button class="search-btn" onclick="searchEntity()">搜索实体</button>
             </div>
 
-            <!-- 新增：热门实体推荐，点击可自动填充输入框 -->
             <div class="hot-entities">
                 <span style="font-size: 14px; color: #666; margin-right: 5px;">热门实体：</span>
                 <span class="hot-entity-tag" onclick="document.getElementById('entitySearchKeyword').value='French'">French</span>
@@ -113,7 +109,6 @@
                 <span class="hot-entity-tag" onclick="document.getElementById('entitySearchKeyword').value='1950'">1950</span>
             </div>
 
-            <!-- 搜索结果卡片容器，和上面的图谱容器样式统一 -->
             <div id="entitySearchResult"></div>
         </div>
     </div>
