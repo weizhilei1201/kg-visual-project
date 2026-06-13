@@ -28,6 +28,7 @@ web/
 ├── page_subgraph.html # 实体检索与聚类页面
 ├── page_graph.html # 全局知识图谱页面
 └── page_cluster.html # 聚类统计页面
+```text
 
 ## 数据格式说明
 **data.json 中的每条数据格式如下：**
