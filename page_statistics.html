@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据大屏</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        .total-count-text {
+            font-size: 22px;
+            color: #165DFF;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .header h1 {
+            color: #165DFF;
+            font-size: 32px;
+        }
+        /* 调整卡片交互效果 */
+        .chart-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .chart-card:hover {
+            background-color: #f8faff; /* 非常浅的蓝色，几乎不深 */
+            transform: scale(1.02); /* 轻微放大2%，很柔和 */
+            box-shadow: 0 2px 8px rgba(22, 93, 255, 0.1); /* 淡阴影，增加立体感 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>数据大屏</h1>
+            <p class="total-count-text" id="totalCountText">数据集总条数：加载中...</p>
+            <p><a href="/">返回首页</a></p>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-card" id="typeChart"></div>
+            <div class="chart-card" id="stepChart"></div>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-card" id="qLenChart"></div>
+            <div class="chart-card" id="qWordChart"></div>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-card" id="wordFreqChart"></div>
+            <div class="chart-card" id="predicateChart"></div>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-card" id="entityDegreeChart"></div>
+            <div class="chart-card" id="entityTopChart"></div>
+        </div>
+    </div>
+
+    <script src="/static/main.js"></script>
+</body>
+</html>

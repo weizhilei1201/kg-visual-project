@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>全局知识图谱样本</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        /* 放大卡片样式 */
+        .graph-card {
+            width: 95%;
+            height: 700px;
+            margin: 20px auto;
+            background: #f8faff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(22, 93, 255, 0.1);
+            padding: 20px;
+            transition: all 0.2s ease;
+        }
+        .graph-card:hover {
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(22, 93, 255, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>全局知识图谱样本</h1>
+            <p><a href="/">返回首页</a></p>
+        </div>
+
+        <div class="graph-card" id="graphChart"></div>
+    </div>
+
+    <script src="/static/main.js"></script>
+    <script>
+        window.addEventListener('load', async function() {
+            const chartDom = document.getElementById('graphChart');
+            const myChart = echarts.init(chartDom);
+
+            const res = await fetch(`${API_BASE}/graph/sample?limit=100`);
+            const json = await res.json();
+            const data = json.data || [];
+
+            const nodes = [];
+            const links = [];
+            const nodeSet = new Set();
+
+            data.forEach(item => {
+                const s = item.subject;
+                const o = item.object;
+                const p = item.predicate;
+
+                if (!nodeSet.has(s)) {
+                    nodeSet.add(s);
+                    nodes.push({ name: s });
+                }
+                if (!nodeSet.has(o)) {
+                    nodeSet.add(o);
+                    nodes.push({ name: o });
+                }
+
+                links.push({
+                    source: s,
+                    target: o,
+                    name: p
+                });
+            });
+
+            const option = {
+                tooltip: {},
+                series: [{
+                    type: 'graph',
+                    layout: 'force',
+                    data: nodes,
+                    links: links,
+                    roam: true,
+                    label: {
+                        show: true,
+                        position: 'right'
+                    },
+                    force: {
+                        repulsion: 200,
+                        edgeLength: 100
+                    }
+                }]
+            };
+
+            myChart.setOption(option);
+        });
+    </script>
+</body>
+</html>
