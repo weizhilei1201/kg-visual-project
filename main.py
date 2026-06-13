@@ -21,14 +21,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 连接ArangoDB（按你本地配置修改账号密码）
+# 连接ArangoDB
 client = ArangoClient(hosts="http://127.0.0.1:8529")
 db = client.db("multihop_qa", username="root", password="arangodb123")
 
 # 缓存集合
 cache_col = db.collection("stat_cache")
 
-# ===================== 页面路由（不变） =====================
+# ===================== 页面路由 =====================
 @app.get("/")
 def home_page():
     return FileResponse("index.html")
@@ -49,7 +49,6 @@ def page_subgraph():
 def page_graph():
     return FileResponse("page_graph.html")
 
-# ===================== 原有业务API（全部保留，无修改） =====================
 # 1. 关键词检索
 @app.get("/api/search")
 def search(
@@ -243,7 +242,7 @@ def search_entity(keyword: str = Query(...), limit: int = 50):
     entity_list = list(entities)[:limit]
     return {"code": 200, "count": len(entities), "data": entity_list}
 
-# ===================== 【新增】预计算全量统计 & 写入缓存接口 =====================
+# ===================== 预计算全量统计 & 写入缓存接口 =====================
 # 英文停用词（基础过滤）
 STOP_WORDS = {
     "a","an","the","and","or","but","is","are","am","was","were","be","been",
@@ -365,7 +364,7 @@ def calc_all_stat():
 
     return {"code":200, "msg":"全量统计计算完成，已写入缓存"}
 
-# ===================== 【新增】缓存查询接口（前端页面调用） =====================
+# ===================== 缓存查询接口（前端页面调用） =====================
 def get_cache_data(stat_type: str):
     aql = "FOR d IN stat_cache FILTER d.type == @t RETURN d.data"
     res = list(db.aql.execute(aql, bind_vars={"t": stat_type}))
