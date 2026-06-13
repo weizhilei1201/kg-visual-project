@@ -12,20 +12,17 @@ function closeModal() {
     modal.style.display = "none";
 }
 
-// 统一数据请求&渲染核心方法（默认浏览 / 关键词搜索 共用）
 async function fetchData(page = 1, keyword = "") {
     const resDom = document.getElementById("results");
     const nextBtn = document.getElementById("next-page-btn");
     const statusTip = document.getElementById("status-tip");
-
-    // 加载中禁用分页按钮
+    
     if (nextBtn) {
         nextBtn.disabled = true;
         nextBtn.classList.add("disabled");
     }
 
     try {
-        // 拼接带分页、关键词的请求地址
         let url = `${API_BASE}/search?page=${page}&page_size=${PAGE_SIZE}`;
         if (keyword) {
             url += `&keyword=${encodeURIComponent(keyword)}`;
@@ -69,7 +66,6 @@ async function fetchData(page = 1, keyword = "") {
             }
         }
 
-        // 数据不足5条 → 已是最后一页，禁用下一页
         if (nextBtn) {
             if (json.data.length < PAGE_SIZE) {
                 nextBtn.disabled = true;
@@ -163,30 +159,29 @@ async function loadReasonChain(docId) {
             series: [{
                 type: "graph",
                 layout: "force",
-                force: { repulsion: 300, edgeLength: 150 }, // 拉长节点间距，避免文字重叠
+                force: { repulsion: 300, edgeLength: 150 }, 
                 roam: true,
                 label: {
                     show: true,
                     fontSize: 16,
-                    color: '#000000' // 节点文字改为纯黑
+                    color: '#000000' 
                 },
-                // 关键：边标签配置，在链路中间显示文字
                 edgeLabel: {
                     show: true,
                     fontSize: 12,
-                    color: '#333', // 链路文字用深灰色，不刺眼
+                    color: '#333', 
                     formatter: function(params) {
                         return params.data.name;
                     },
-                    position: 'middle' // 文字显示在链路中间
+                    position: 'middle'
                 },
                 edgeSymbol: ['none', 'arrow'],
-                edgeSymbolSize: [0, 16], // 箭头大小
+                edgeSymbolSize: [0, 16],
                 nodes: Array.from(nodes.values()),
                 links: links,
                 lineStyle: {
                     curveness: 0.3,
-                    width: 4 // 链路宽度，和links里的配置保持一致
+                    width: 4 
                 }
             }]
         });
@@ -289,33 +284,27 @@ async function initGlobalGraph() {
     }
 }
 
-
-
-// ========== 新增：演示实体配置（和页面热门标签保持一致） ==========
+// ========== 演示实体配置 ==========
 const demoEntityList = ["French", "American", "director", "actor", "actress", "1950"];
 let currentDemoIndex = 0;
 
-// 页面加载完成 → 自动加载默认演示图谱
 window.addEventListener('DOMContentLoaded', function () {
     loadRandomDemoEntity();
 });
 
-// 【换一个】按钮触发函数
 function loadRandomDemoEntity() {
     // 循环切换实体
     currentDemoIndex = (currentDemoIndex + 1) % demoEntityList.length;
     const targetEntity = demoEntityList[currentDemoIndex];
 
-    // 自动填充输入框、固定为 1跳 / 最多50条
     document.getElementById("clusterEntity").value = targetEntity;
     document.getElementById("clusterDepth").value = "1";
     document.getElementById("clusterLimit").value = "50";
 
-    // 调用查询图谱，标记为演示数据
     showEntityCluster(true);
 }
 
-// ========== 改造后的查询图谱函数（新增 isDemo 参数） ==========
+// ========== 查询图谱函数 ==========
 async function showEntityCluster(isDemo = false) {
     const entityInput = document.getElementById("clusterEntity");
     const depthSelect = document.getElementById("clusterDepth");
@@ -360,7 +349,6 @@ async function showEntityCluster(isDemo = false) {
         const linkList = [];
         const nameToIndex = new Map();
 
-        // 两套配色：演示数据 / 用户手动搜索数据
         const demoLineColors = ['#409EFF', '#27AE60', '#F39C12', '#E74C3C', '#8E44AD'];
         const userLineColors = ['#FF6B6B', '#4ECDC4', '#FFA07A', '#6A5ACD', '#FFD700'];
         const colorPool = isDemo ? demoLineColors : userLineColors;
@@ -382,7 +370,6 @@ async function showEntityCluster(isDemo = false) {
                 source: nameToIndex.get(subject),
                 target: nameToIndex.get(object),
                 name: predicate,
-                // 根据类型切换颜色
                 lineStyle: { color: colorPool[idx % colorPool.length] }
             });
         });
@@ -422,7 +409,7 @@ async function showEntityCluster(isDemo = false) {
     }
 }
 
-// ========== 原搜索实体函数 完全原样保留，未做任何修改 ==========
+// ========== 搜索实体函数  ==========
 async function searchEntity() {
     const keywordInput = document.getElementById("entitySearchKeyword");
     const resultDiv = document.getElementById("entitySearchResult");
@@ -580,6 +567,5 @@ window.addEventListener('load', async function () {
         console.error("高频实体图表加载失败", err);
     }
 
-    // 3. 搜索页：页面默认加载第一页5条示例数据
     await fetchData(currentPage, currentKeyword);
 });
