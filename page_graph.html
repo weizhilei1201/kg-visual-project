@@ -43,7 +43,7 @@
             const myChart = echarts.init(chartDom);
             
             // 显示加载提示
-            chartDom.innerHTML = '<div style="text-align:center; padding-top:300px;">正在加载数据...</div>';
+            myChart.showLoading();
             
             try {
                 // 直接读取本地的 data.json
@@ -54,28 +54,33 @@
                 
                 const nodes = new Map();
                 const links = [];
-                let tripleCount = 0;
-                const MAX_TRIPLES = 150;  // 限制最多150条边，避免渲染过慢
+                const MAX_NODES = 20;   // 最多20个节点
+                const MAX_LINKS = 25;   // 最多25条边
                 
-                // 从数据中提取三元组
-                for (let i = 0; i < allData.length && tripleCount < MAX_TRIPLES; i++) {
+                // 从数据中提取三元组，直到节点数达到上限
+                for (let i = 0; i < allData.length && nodes.size < MAX_NODES && links.length < MAX_LINKS; i++) {
                     const steps = allData[i].evidences || [];
-                    for (let j = 0; j < steps.length && tripleCount < MAX_TRIPLES; j++) {
+                    for (let j = 0; j < steps.length && nodes.size < MAX_NODES && links.length < MAX_LINKS; j++) {
                         const step = steps[j];
                         if (Array.isArray(step) && step.length >= 3) {
                             const sub = step[0];
                             const pred = step[1];
                             const obj = step[2];
                             
-                            if (sub && obj) {
-                                if (!nodes.has(sub)) nodes.set(sub, { name: sub });
-                                if (!nodes.has(obj)) nodes.set(obj, { name: obj });
+                            if (sub && obj && sub !== obj) {
+                                if (!nodes.has(sub)) {
+                                    if (nodes.size >= MAX_NODES) break;
+                                    nodes.set(sub, { name: sub });
+                                }
+                                if (!nodes.has(obj)) {
+                                    if (nodes.size >= MAX_NODES) break;
+                                    nodes.set(obj, { name: obj });
+                                }
                                 links.push({
                                     source: sub,
                                     target: obj,
                                     name: pred
                                 });
-                                tripleCount++;
                             }
                         }
                     }
@@ -85,13 +90,16 @@
                 
                 // 如果没有任何数据，显示提示
                 if (nodes.size === 0) {
-                    chartDom.innerHTML = '<div style="text-align:center; padding-top:300px;">暂无图谱数据</div>';
+                    myChart.hideLoading();
+                    myChart.setOption({
+                        title: { text: '暂无图谱数据', left: 'center', top: 'center' }
+                    });
                     return;
                 }
                 
                 const option = {
                     title: {
-                        text: '全局知识图谱样本 (显示前 ' + tripleCount + ' 条关系)',
+                        text: '全局知识图谱样本 (' + nodes.size + ' 个节点, ' + links.length + ' 条关系)',
                         left: 'center',
                         textStyle: { fontSize: 14 }
                     },
@@ -127,9 +135,10 @@
                         edgeSymbol: ['none', 'arrow'],
                         edgeSymbolSize: [0, 8],
                         force: {
-                            repulsion: 300,
-                            edgeLength: 120,
-                            gravity: 0.1
+                            repulsion: 500,
+                            edgeLength: 150,
+                            gravity: 0.1,
+                            friction: 0.1
                         },
                         lineStyle: {
                             curveness: 0.2,
@@ -138,6 +147,7 @@
                     }]
                 };
                 
+                myChart.hideLoading();
                 myChart.setOption(option);
                 
                 // 窗口大小变化时重新调整
@@ -147,7 +157,10 @@
                 
             } catch (err) {
                 console.error('加载失败:', err);
-                chartDom.innerHTML = '<div style="text-align:center; padding-top:300px; color:red;">加载失败：' + err.message + '</div>';
+                myChart.hideLoading();
+                myChart.setOption({
+                    title: { text: '加载失败：' + err.message, left: 'center', top: 'center' }
+                });
             }
         });
     </script>
