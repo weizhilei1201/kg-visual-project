@@ -28,44 +28,6 @@ web/
 ├── page_graph.html # 全局知识图谱页面
 └── page_cluster.html # 聚类统计页面
 
-text
-
-## 快速开始
-
-### 1. 导出数据
-
-如果你已有 ArangoDB 数据库，运行以下脚本导出数据：
-
-```bash
-python export_data.py
-脚本会将数据导出为 web/data.json。
-
-2. 本地预览
-在项目根目录启动一个简单的 HTTP 服务器：
-
-bash
-# Python 3
-python -m http.server 8080 --directory web
-
-# 或使用 npx
-npx serve web
-然后访问 http://localhost:8080
-
-3. 部署到 GitHub Pages
-将 web 文件夹下的所有文件推送到 GitHub 仓库：
-
-bash
-git add web/
-git commit -m "Deploy static version"
-git push origin main
-在仓库 Settings -> Pages 中：
-
-Source 选择 Deploy from a branch
-
-Branch 选择 main，文件夹选择 /web
-
-部署成功后访问：https://你的用户名.github.io/仓库名/
-
 数据格式说明
 data.json 中的每条数据格式如下：
 
@@ -81,20 +43,21 @@ json
     ["实体2", "关系", "实体3"]
   ]
 }
+
+
+
 页面功能
-页面	功能
-问题多跳可视化	关键词检索问题，点击查看推理链路图谱
-数据大屏	展示问题类型分布、推理步数分布、高频词汇等统计图表
-实体检索与聚类	搜索实体名称，查看 1-2 跳关联子图
-全局知识图谱	展示知识图谱样本
+页面	             功能
+问题多跳可视化	     关键词检索问题，点击查看推理链路图谱
+数据大屏            展示问题类型分布、推理步数分布、高频词汇等统计图表
+实体检索与聚类	     搜索实体名称，查看 1-2 跳关联子图
+全局知识图谱	       展示知识图谱样本
+
 注意事项
 本项目为纯静态版本，所有数据来自 data.json，无需后端服务
-
 数据大屏的统计图表均从前端实时计算，无需预计算缓存
-
 建议使用现代浏览器（Chrome、Edge、Firefox）获得最佳体验
 
 相关链接
 ECharts 官方文档
-
 GitHub Pages 部署指南
